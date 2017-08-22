@@ -1,5 +1,6 @@
 require "./token.cr"
 
+# Transform source text into a series of tokens.
 class Lexer
   # The source code being lexed.
   property source : String
@@ -25,10 +26,10 @@ class Lexer
     advance_token
 
     # Switch over whatever the current character is.
-    case current_char
-    when '\0'
-      read_char
-      @current_token.type = TokenType::EOF
+    case current_char # @source[pos]
+    when '\0' # end file char
+      read_char # set the current_token value
+      @current_token.type = TokenType::EOF # set the current_token type
     when '+'
       read_char
       @current_token.type = TokenType::PLUS
@@ -78,7 +79,6 @@ class Lexer
     # Return the newly read token
     @current_token
   end
-
 
   # Return the character at the current position in the source.
   private def current_char

@@ -1,9 +1,10 @@
 require "./instruction.cr"
 
+# Virtual Machine design = Stack machine
 class Interpreter
   # The 'stack' in our Stack Machine.
   property stack : Array(Float64)
-  # A table of variables and their current values.
+  # "symbol table" - A table of variables and their current values.
   property variables : Hash(String, Float64)
   # The list of instructions to be interpreted.
   property instructions : Array(Instruction)
@@ -13,6 +14,7 @@ class Interpreter
     @variables = {} of String => Float64
   end
 
+  # read the current instruction, perform the appropriate action for it, and repeat
   def run
     # Attempt to remove the first element from `instructions`. Return nil if none exists.
     while (inst = instructions.shift?)

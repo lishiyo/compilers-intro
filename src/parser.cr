@@ -1,15 +1,19 @@
 require "./instruction.cr"
 
+# Parsing is a supertype of lexing.
+# The parser consumes the token stream generated from lexing:
+# - determines the semantic meaning behind them 
+# - enforces syntactic rules
+# => outputs array of Instructions to interpreter
 class Parser < Lexer
   # The list of instructions parsed from the source code. This is what will be fed to the interpreter.
   property instructions : Array(Instruction) = [] of Instruction
 
   # Advance through the token stream until a significant token is encountered.
-  # This abstraction allows the rest of the parser to quietly ignore whitespace
-  # and other insignificant tokens.
+  # This abstraction allows the rest of the parser to quietly ignore whitespace and other insignificant tokens.
   def advance
     while read_token.type == TokenType::WHITESPACE; end
-    current_token
+    current_token # set current_token to next non-whitespace char
   end
 
   # Check if the current token matches the given type and return
@@ -18,7 +22,7 @@ class Parser < Lexer
   def accept(type : TokenType)
     token = current_token
     if current_token.type == type
-      advance
+      advance # advances the current_token to next
       token
     end
   end
@@ -28,7 +32,6 @@ class Parser < Lexer
     accept(type) || raise "Expected #{type}, got #{current_token.type}."
   end
 
-
   def parse_program
     advance
     until @current_token.type == TokenType::EOF
@@ -37,22 +40,24 @@ class Parser < Lexer
   end
 
   def parse_statement
-    if accept(TokenType::AT)
+    if accept(TokenType::AT) # current was @
       parse_assignment
     else
       parse_expr
     end
   end
 
+  # @vartoset = 4
+  # PUSH, STORE
   def parse_assignment
-    name = expect(TokenType::NAME)
+    name = expect(TokenType::NAME) 
     expect(TokenType::EQUAL)
     parse_expr
     instructions << Instruction.new(InstructionType::STORE, [name.value])
   end
 
   def parse_expr
-    parse_term
+    parse_term # check multiply and divide
     if accept(TokenType::PLUS)
       parse_expr
       instructions << Instruction.new(InstructionType::ADD)
@@ -63,7 +68,7 @@ class Parser < Lexer
   end
 
   def parse_term
-    parse_factor
+    parse_factor # check parens and numbers
     if accept(TokenType::STAR)
       parse_term
       instructions << Instruction.new(InstructionType::MULTIPLY)
@@ -73,6 +78,8 @@ class Parser < Lexer
     end
   end
 
+  # (2 * 4) + alpha => factor, term, factor, factor, expr, factor
+  # PUSH(2), PUSH(4), MULTIPLY, LOAD(alpha), ADD 
   def parse_factor
     if accept(TokenType::LPAREN)
       parse_expr

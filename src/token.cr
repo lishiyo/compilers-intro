@@ -15,5 +15,5 @@ end
 
 class Token
   property type : TokenType = TokenType::EOF
-  property value : String = ""
+  property value : String = "" # even number tokens are string in lexing phase
 end

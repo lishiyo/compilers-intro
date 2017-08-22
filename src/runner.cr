@@ -8,7 +8,7 @@ parser = Parser.new(%q(
   @b = 1 + 3 * 3
   @c = b / a
 ))
-parser.parse_program
+parser.parse_program # => instructions
 
 # Run those instructions.
 vm = Interpreter.new(parser.instructions)
